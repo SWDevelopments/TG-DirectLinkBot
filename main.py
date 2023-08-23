@@ -77,6 +77,12 @@ def unknown(update: Update, context: CallbackContext):
     update.message.reply_text("Sorry, I didn't understand that command. Use /help to see the list of available commands.")
 
 
+def send_status_message(context: CallbackContext):
+    """Send a status message when the bot is deployed successfully"""
+    status_message = "Bot deployed successfully!"
+    context.bot.send_message(chat_id=FEEDBACK_CHANNEL_ID, text=status_message)
+
+
 def main():
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
     logger = logging.getLogger()
@@ -92,6 +98,9 @@ def main():
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, feedback))
     dp.add_handler(MessageHandler(Filters.all, log_message))
     dp.add_handler(MessageHandler(Filters.command, unknown))
+
+    # Schedule sending the status message after 1 second
+    updater.job_queue.run_once(send_status_message, 1)
 
     updater.start_polling()
     updater.idle()
